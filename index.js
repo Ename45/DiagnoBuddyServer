@@ -14,9 +14,9 @@ app.use(cors({
 }));
 
 
-// app.get("/", (req, res) => {
-//   res.send("Hi its me")
-// })
+app.get("/", (req, res) => {
+  res.send("Hi its me")
+})
 
 
 app.use("/api/v1/diagnoBuddy/chats", ChatRoutes);
