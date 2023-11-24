@@ -8,15 +8,12 @@ const app = express()
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
-app.use(cors({
-  origin: "",
-  credentials: true
-}));
-
-
-// app.get("/", (req, res) => {
-//   res.send("Hi its me")
-// })
+app.use(
+  cors({
+    origin: "https://diagno-buddy.vercel.app",
+    credentials: true,
+  })
+);
 
 
 app.use("/api/v1/diagnoBuddy/chats", ChatRoutes);

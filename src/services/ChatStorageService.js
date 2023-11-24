@@ -1,5 +1,3 @@
-// ChatStorageService.js
-
 const createChatStorage = () => {
   const chatStorage = new Map();
 
