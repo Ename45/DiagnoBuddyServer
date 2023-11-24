@@ -43,7 +43,7 @@ module.exports = {
 
 
 function checkIfNull(email, message) {
-  if (!email || email.trim() === "") {
+  if (!email) {
     throw new Error(emailNotSent);
   }
 

@@ -21,7 +21,6 @@ describe("ChatService TestCases", () => {
   beforeEach(() => {
     jest.spyOn(ChatStorageService, "addChat").mockReset();
     jest.spyOn(ChatStorageService, "getHistoryOfChat").mockReset();
-    jest.spyOn(ChatStorageService, "deleteChats").mockReset();
     global.fetch.mockReset();
   });
 

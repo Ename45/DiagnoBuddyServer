@@ -16,21 +16,9 @@ const createChatStorage = () => {
   };
 
 
-
-  const deleteChats = (email) => {
-    if (chatStorage.has(email)) {
-      chatStorage.delete(email);
-    } else {
-      return `No chat history for ${email}`;
-    }
-  };
-
-
-
   return {
     addChat,
     getHistoryOfChat,
-    deleteChats,
   };
 };
 
