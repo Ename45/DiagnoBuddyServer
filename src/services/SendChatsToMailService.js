@@ -35,10 +35,12 @@ module.exports = {
 
 async function sendUserChat(email, userChatHistory) {
   const formattedChats = userChatHistory.map((chat, index) => {
-    return `<p><strong>You ${index + 1}:</strong> ${chat.message}</p>
-            <p><strong>DiagnoBuddy ${index + 1}:</strong> ${JSON.stringify(
+    return `
+      <p><strong>You ${index + 1}:</strong> ${chat.message}</p>
+      <p><strong>DiagnoBuddy ${index + 1}:</strong> ${formatResponse(
       chat.response
-    )}</p>`;
+    )}</p>
+    `;
 
   });
 
@@ -49,7 +51,7 @@ async function sendUserChat(email, userChatHistory) {
   };
 
   try {
-    const mailMessage = await requestEmail(mailDetails, userChatHistory);
+    const mailMessage = await requestEmail(mailDetails);
     return mailMessage;
   } catch (error) {
     throw error;
@@ -57,7 +59,7 @@ async function sendUserChat(email, userChatHistory) {
 }
 
 
-const requestEmail = async (request, userChatHistory) => {
+const requestEmail = async (request) => {
   const { email, subject, message } = request;
 
   if (!(email && message && subject)) {
@@ -68,7 +70,6 @@ const requestEmail = async (request, userChatHistory) => {
     email,
     subject,
     message,
-    userChatHistory
   };
 
   try {
@@ -111,4 +112,9 @@ async function sendEmailWithChats(email, subject, message) {
   } catch (error) {
     throw error;
   }
+}
+
+
+function formatResponse(response) {
+  return response.replace(/\n/g, '<br>')
 }

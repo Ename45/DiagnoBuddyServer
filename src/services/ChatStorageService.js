@@ -5,15 +5,15 @@ const createChatStorage = () => {
     if (!chatStorage.has(email)) {
       chatStorage.set(email, []);
     }
-
     chatStorage.get(email).push({ message, response });
   };
 
   const getHistoryOfChat = (email) => {
+    chatStorage.forEach((message, response) => {
+      console.log(message, response)
+    });
     return chatStorage.get(email) || [];
   };
-
-
 
   const resetChatHistory = (email) => {
     if (chatStorage.has(email)) {

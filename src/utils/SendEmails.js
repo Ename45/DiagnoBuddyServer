@@ -12,16 +12,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log(success);
-  }
-});
+const verifyTransporter = async () => {
+  return new Promise((resolve, reject) => {
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else {
+        console.log(success);
+        resolve(success);
+      }
+    });
+  });
+};
 
 const sendEmail = async (mailOptions) => {
   try {
+    await verifyTransporter();
     await transporter.sendMail(mailOptions);
     return;
   } catch (error) {

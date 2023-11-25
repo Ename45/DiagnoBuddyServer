@@ -5,14 +5,14 @@ const emptyMessageErrorMessage =
   "I apologize for any confusion, but I'm unable to provide any assistance without a clear description of your symptoms or health concerns. If you're experiencing any specific symptoms or have any health-related questions, please let me know, and I'll do my best to help you.";
 const emailNotSent = "No email provided";
 
-const sessiontimeout = 30 * 60 *1000;
+const sessiontimeout = 1 * 60 *1000;
 
 const processResponse = async ({ email, message }) => {
   checkIfNull(email, message);
 
   verifyThatSessionHasNotExpired(email);
 
-  const apiUrl = `https://diagnobuddy.azurewebsites.net/api/gpmodel/?user_input=${encodeURIComponent(
+  const apiUrl = `https://diagnobuddy.azurewebsites.net/api/langchainmodel/?user_input=${encodeURIComponent(
     message
   )}`;
 
@@ -27,6 +27,7 @@ const processResponse = async ({ email, message }) => {
     const data = await response.json();
 
     const newData = data.AI_out;
+    console.log("newData==============>", newData)
     await ChatStorageService.addChat(email, message, newData);
 
     UserSessionTracker.updateLastUserActivityTime(email);

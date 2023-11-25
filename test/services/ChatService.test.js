@@ -31,7 +31,7 @@ describe("ChatService TestCases", () => {
 
   test("should process response and add chat to history", async () => {
     const email = "user@example.com";
-    const message = "I feel sick?";
+    const message = "I feel sick";
     const mockData = { AI_out: "please be specific." };
 
     global.fetch.mockResolvedValueOnce({
@@ -41,7 +41,7 @@ describe("ChatService TestCases", () => {
     await ChatService.processResponse({ email, message });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `https://diagnobuddy.azurewebsites.net/api/gpmodel/?user_input=${encodeURIComponent(
+      `https://diagnobuddy.azurewebsites.net/api/langchainmodel/?user_input=${encodeURIComponent(
         message
       )}`,
       {
