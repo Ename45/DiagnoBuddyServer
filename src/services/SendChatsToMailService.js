@@ -22,7 +22,7 @@ const sendChat = async (email) => {
 
   const chatMessage = await sendUserChat(email, userChatHistory);
 
-  await ChatStorageService.deleteChats(email)
+  ChatStorageService.resetChatHistory(email)
 
   return chatMessage;
 };

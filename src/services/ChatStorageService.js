@@ -15,20 +15,18 @@ const createChatStorage = () => {
     return chatStorage.get(email) || [];
   };
 
-
-  const deleteChats = (email) => {
-    if (chatStorage.has(email)) {
-      chatStorage.delete(email);
-    } else {
-      return `No chat history for ${email}`;
-    }
-  };
+    const resetChatHistory = (email) => {
+      if (chatStorage.has(email)) {
+        chatStorage.set(email, []);
+      }
+    };
 
 
   return {
     addChat,
     getHistoryOfChat,
     deleteChats,
+    resetChatHistory
   };
 };
 
