@@ -25,7 +25,6 @@ const createChatStorage = () => {
   return {
     addChat,
     getHistoryOfChat,
-    deleteChats,
     resetChatHistory
   };
 };
