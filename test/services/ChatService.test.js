@@ -1,5 +1,7 @@
-const { processResponse } = require("../../src/services/ChatService");
+const ChatService = require("../../src/services/ChatService");
 const ChatStorageService = require("../../src/services/ChatStorageService");
+const UserSessionTracker = require("../../src/services/UserSessionTracker")
+
 
 jest.spyOn(global, "fetch");
 
@@ -9,13 +11,16 @@ const emptyMessageErrorMessage =
 
 describe("ChatService TestCases", () => {
   const originalConsoleError = console.error;
+  const realDateNow = Date.now.bind(global.Date);
 
   beforeAll(() => {
     console.error = jest.fn();
+    global.Date.now = jest.fn(() => 0);
   });
 
   afterAll(() => {
     console.error = originalConsoleError;
+    global.Date.now = realDateNow;
   });
 
   beforeEach(() => {
@@ -26,14 +31,14 @@ describe("ChatService TestCases", () => {
 
   test("should process response and add chat to history", async () => {
     const email = "user@example.com";
-    const message = "How are you?";
-    const mockData = { AI_out: "I am fine." };
+    const message = "I feel sick?";
+    const mockData = { AI_out: "please be specific." };
 
     global.fetch.mockResolvedValueOnce({
       json: jest.fn().mockResolvedValueOnce(mockData),
     });
 
-    await processResponse({ email, message });
+    await ChatService.processResponse({ email, message });
 
     expect(global.fetch).toHaveBeenCalledWith(
       `https://diagnobuddy.azurewebsites.net/api/gpmodel/?user_input=${encodeURIComponent(
@@ -59,7 +64,7 @@ describe("ChatService TestCases", () => {
     jest.spyOn(global, "fetch");
 
     try {
-      await processResponse({ email: "", message: "I am sick?" });
+      await ChatService.processResponse({ email: "", message: "I am sick?" });
     } catch (error) {
       expect(error.message).toBe(emailNotSent);
 
@@ -76,7 +81,7 @@ describe("ChatService TestCases", () => {
     jest.spyOn(global, "fetch");
 
     try {
-      await processResponse({ email: "user@example.com", message: "" });
+      await ChatService.processResponse({ email: "user@example.com", message: "" });
     } catch (error) {
       expect(error.message).toBe(emptyMessageErrorMessage);
 
@@ -97,7 +102,7 @@ describe("ChatService TestCases", () => {
     });
 
     try {
-      await processResponse({ email: "user@example.com", message: "2 plus 2" });
+      await ChatService.processResponse({ email: "user@example.com", message: "2 plus 2" });
     } catch (error) {
       expect(error.message).toBe(
         "I'm sorry, but I'm unable to assist with that question. My role is to provide medical advice and information. If you have any health concerns or questions, please feel free to ask."
@@ -118,7 +123,7 @@ describe("ChatService TestCases", () => {
     global.fetch.mockRejectedValueOnce(new Error("Simulated fetch failure"));
 
     try {
-      await processResponse({ email: "user@example.com", message: "Im sick?" });
+      await ChatService.processResponse({ email: "user@example.com", message: "Im sick?" });
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
 
@@ -126,6 +131,29 @@ describe("ChatService TestCases", () => {
       expect(ChatStorageService.addChat).not.toHaveBeenCalled();
       expect(ChatStorageService.getHistoryOfChat).not.toHaveBeenCalled();
     }
+  });
+
+  test("should reset chat history if user is inactive for more than 30 minutes", async () => {
+    const email = "user@example.com";
+    const message = "I feel sick";
+    const mockData = { AI_out: "Please give more details." };
+
+    jest
+      .spyOn(ChatStorageService, "resetChatHistory")
+      .mockImplementation(jest.fn());
+
+    UserSessionTracker.updateLastUserActivityTime(email);
+
+    global.Date.now = jest.fn(() => 31 * 60 * 1000);
+
+    global.fetch.mockResolvedValueOnce({
+      json: jest.fn().mockResolvedValueOnce(mockData),
+    });
+
+    await ChatService.processResponse({ email, message });
+
+    expect(ChatStorageService.resetChatHistory).toHaveBeenCalledWith(email);
+    expect(ChatStorageService.getHistoryOfChat.length).toBe(0);
   });
 
 });

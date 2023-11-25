@@ -9,26 +9,23 @@ const createChatStorage = () => {
     chatStorage.get(email).push({ message, response });
   };
 
-
-
   const getHistoryOfChat = (email) => {
     return chatStorage.get(email) || [];
   };
 
-    const resetChatHistory = (email) => {
-      if (chatStorage.has(email)) {
-        chatStorage.set(email, []);
-      }
-    };
 
+
+  const resetChatHistory = (email) => {
+    if (chatStorage.has(email)) {
+      chatStorage.set(email, []);
+    }
+  };
 
   return {
     addChat,
     getHistoryOfChat,
-    resetChatHistory
+    resetChatHistory,
   };
 };
-
-
 
 module.exports = createChatStorage();
