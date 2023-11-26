@@ -44,4 +44,5 @@ const cookieToken = async (email, res) => {
 
 module.exports = {
   cookieToken,
+  generateId
 };

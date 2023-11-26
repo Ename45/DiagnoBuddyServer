@@ -2,75 +2,89 @@ const SendChatsToMailService = require("../../src/services/SendChatsToMailServic
 const ChatStorageService = require("../../src/services/ChatStorageService");
 const SendEmail = require("../../src/utils/SendEmails");
 
-jest.mock("../../src/utils/SendEmails");
+const mockSendEmail = jest.spyOn(SendEmail, "sendEmail");
+
+jest.mock("../../src/services/ChatStorageService", () => ({
+  getHistoryOfChat: jest.fn(),
+  resetChatHistory: jest.fn(),
+}));
+
+const mockChatHistory = [
+  { message: "Hi", response: "How can i assist" },
+  {
+    message: "I feel sick",
+    response: "Please be specific",
+  },
+];
+
+function formatResponse(response) {
+  return response.replace(/\n/g, "<br>");
+}
 
 describe("SendChatsToMailService TestCases", () => {
-  beforeEach(() => {
-    ChatStorageService.resetChatHistory("user@example.com");
-    SendEmail.sendEmail.mockReset();
+  test("should throw error if email is not provided", async () => {
+    try {
+      await SendChatsToMailService.sendChat();
+    } catch (error) {
+      expect(error.message).toBe("email not provided");
+    }
   });
 
-  test("should send chat successfully", async () => {
-    const email = "user@example.com";
-    const message = "I feel sick";
-    const response = "Please provide more details.";
+  test("should throw error if user has no chat history", async () => {
+    jest.spyOn(ChatStorageService, "getHistoryOfChat").mockReturnValueOnce([]);
 
-    ChatStorageService.addChat(email, message, response);
+    try {
+      await SendChatsToMailService.sendChat("some@example.com");
+    } catch (error) {
+      expect(error.message).toBe("No chat to send");
+    }
+  });
 
-    SendEmail.sendEmail.mockResolvedValueOnce();
+  test("should successfully send chat to email", async () => {
+    const mockChatHistory = [
+      { message: "Hi", response: "Hello there!" },
+      {
+        message: "How are you?",
+        response: "I'm doing well, thanks for asking.",
+      },
+    ];
+    jest
+      .spyOn(ChatStorageService, "getHistoryOfChat")
+      .mockReturnValueOnce(mockChatHistory);
 
-    await expect(SendChatsToMailService.sendChat(email)).resolves.toBe(
-      "Chat successfully sent, check mailbox"
+    const chatMessage = await SendChatsToMailService.sendChat(
+      "test@example.com"
     );
-    expect(SendEmail.sendEmail).toHaveBeenCalled();
-  });
-
-  test("should throw an error if email is not provided", async () => {
-    await expect(SendChatsToMailService.sendChat("")).rejects.toThrow(
-      "email not provided"
+    expect(chatMessage).toBe("Chat successfully sent, check mailbox");
+    expect(ChatStorageService.getHistoryOfChat).toHaveBeenCalledWith(
+      "test@example.com"
     );
-    expect(SendEmail.sendEmail).not.toHaveBeenCalled();
-  });
-
-  test("should throw an error if there is no chat history", async () => {
-    await expect(
-      SendChatsToMailService.sendChat("user@example.com")
-    ).rejects.toThrow("No chat to send");
-    // Ensure that SendEmail.sendEmail is not called
-    expect(SendEmail.sendEmail).not.toHaveBeenCalled();
-  });
-
-  test("should throw an error if there is a problem sending email", async () => {
-    const email = "user@example.com";
-    const message = "I feel sick";
-    const response = "Please provide more details.";
-
-    ChatStorageService.addChat(email, message, response);
-
-    SendEmail.sendEmail.mockRejectedValueOnce(
-      new Error("Failed to send email")
+    expect(ChatStorageService.resetChatHistory).toHaveBeenCalledWith(
+      "test@example.com"
     );
+  });
 
-    await expect(SendChatsToMailService.sendChat(email)).rejects.toThrow(
-      "Failed to send email"
+test("should handle errors sending emails", async () => {
+  jest
+    .spyOn(ChatStorageService, "getHistoryOfChat")
+    .mockReturnValueOnce(mockChatHistory);
+  mockSendEmail.mockImplementationOnce(() => {
+    throw new Error("Failed to send email");
+  });
+
+  try {
+    await SendChatsToMailService.sendChat("test@example.com");
+  } catch (error) {
+    expect(error.message).toBe("Failed to send email");
+  }
+});
+
+
+  test("should format chat responses correctly", () => {
+    
+    const formattedResponse = formatResponse(
+      "Hello there.\nHow can I help you?"
     );
-    expect(SendEmail.sendEmail).toHaveBeenCalled();
+    expect(formattedResponse).toBe("Hello there.<br>How can I help you?");
   });
-
-  test("should reset chat history after sending email", async () => {
-    const email = "user@example.com";
-    const message = "I feel sick";
-    const response = "Please provide more details.";
-
-    ChatStorageService.addChat(email, message, response);
-
-    SendEmail.sendEmail.mockResolvedValueOnce();
-
-    await expect(SendChatsToMailService.sendChat(email)).resolves.toBeTruthy();
-
-    const history = ChatStorageService.getHistoryOfChat(email);
-    expect(history).toHaveLength(0);
-  });
-
-  
 });

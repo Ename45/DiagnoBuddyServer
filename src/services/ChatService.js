@@ -5,6 +5,7 @@ const emptyMessageErrorMessage =
   "I apologize for any confusion, but I'm unable to provide any assistance without a clear description of your symptoms or health concerns. If you're experiencing any specific symptoms or have any health-related questions, please let me know, and I'll do my best to help you.";
 const emailNotSent = "No email provided";
 
+
 const processResponse = async ({ email, message, sessionId }, res) => {
 
   checkIfNull(email, message);
@@ -24,7 +25,6 @@ const processResponse = async ({ email, message, sessionId }, res) => {
         "Content-Type": "application/json",
       },
     });
-
     const data = await response.json();
 
     const aiResponse = data.AI_out;
@@ -37,7 +37,7 @@ const processResponse = async ({ email, message, sessionId }, res) => {
       sessionId,
     };
   } catch (error) {
-    throw error;
+    throw error
   }
 };
 

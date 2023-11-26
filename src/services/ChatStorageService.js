@@ -13,13 +13,6 @@ const createChatStorage = () => {
 
   const getHistoryOfChat = (email) => {
     const userChatInfo = chatStorage.get(email) || [];
-
-    // console.log("User chat info in Storage1=====>", userChatInfo)
-
-    // userChatInfo.forEach(({ message, response, sessionId }) => {
-    //   console.log(message, response, sessionId);
-    // });
-
     return userChatInfo;
   };
 
