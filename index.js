@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser")
 const ChatRoutes = require("./src/routes/ChatRoutes")
 const SendChatsToMailRoutes = require("./src/routes/SendChatsToMailRoutes")
 require("dotenv").config()
@@ -15,6 +16,7 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 
 app.use("/api/v1/diagnoBuddy/chats", ChatRoutes);
 app.use("/api/v1/diagnoBuddy/sendMail", SendChatsToMailRoutes);

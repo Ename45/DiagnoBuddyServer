@@ -41,9 +41,7 @@ describe("ChatService TestCases", () => {
     await ChatService.processResponse({ email, message });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `https://diagnobuddy.azurewebsites.net/api/langchainmodel/?user_input=${encodeURIComponent(
-        message
-      )}`,
+      `https://diagnobuddy.azurewebsites.net/api/langchainmodel/?user_input=${encodeURIComponent(message)}`,
       {
         method: "POST",
         headers: {

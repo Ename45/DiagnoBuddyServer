@@ -1,20 +1,21 @@
 const ChatStorageService = require("./ChatStorageService");
-const UserSessionTracker = require("../../src/services/UserSessionTracker")
+const SessionId = require("../../src/utils/SessionId")
 
 const emptyMessageErrorMessage =
   "I apologize for any confusion, but I'm unable to provide any assistance without a clear description of your symptoms or health concerns. If you're experiencing any specific symptoms or have any health-related questions, please let me know, and I'll do my best to help you.";
 const emailNotSent = "No email provided";
 
-const sessiontimeout = 1 * 60 *1000;
+const processResponse = async ({ email, message, sessionId }, res) => {
 
-const processResponse = async ({ email, message }) => {
   checkIfNull(email, message);
 
-  verifyThatSessionHasNotExpired(email);
+  if (!sessionId) {
+    sessionId = await SessionId.cookieToken(email, res);
+  }
 
-  const apiUrl = `https://diagnobuddy.azurewebsites.net/api/langchainmodel/?user_input=${encodeURIComponent(
+  const apiUrl = `https://diagnobuddy.azurewebsites.net/api/gpmodel/?user_input=${encodeURIComponent(
     message
-  )}`;
+  )}&session_id=${sessionId}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -26,14 +27,15 @@ const processResponse = async ({ email, message }) => {
 
     const data = await response.json();
 
-    const newData = data.AI_out;
-    console.log("newData==============>", newData)
-    await ChatStorageService.addChat(email, message, newData);
-
-    UserSessionTracker.updateLastUserActivityTime(email);
+    const aiResponse = data.AI_out;
+    // console.log("newData==============>", aiResponse);
+    await ChatStorageService.addChat(email, message, aiResponse, sessionId);
 
     await ChatStorageService.getHistoryOfChat(email);
-    return data;
+    return {
+      data,
+      sessionId,
+    };
   } catch (error) {
     throw error;
   }
@@ -45,14 +47,6 @@ module.exports = {
 
 
 
-function verifyThatSessionHasNotExpired(email) {
-  const lastUserActivityTime = UserSessionTracker.getLastUserActivityTime(email);
-
-  if (lastUserActivityTime === undefined ||
-    Date.now() - lastUserActivityTime > sessiontimeout) {
-    ChatStorageService.resetChatHistory(email);
-  }
-}
 
 function checkIfNull(email, message) {
   if (!email) {
