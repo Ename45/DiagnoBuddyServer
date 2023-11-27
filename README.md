@@ -9,11 +9,11 @@ To use the DiagnoBuddy Server run the command: npm start
                           {index.js COMPONENT}
 {INITIAL ROUTES}
 1) *Chat Routes* 
-(POST /api/v1/diagnoBuddy/chats): 
+(POST https://diagno-buddy.vercel.app/api/v1/diagnoBuddy/chats)
 Endpoint for processing user messages and generating AI responses.
 
 2) *SendChatsToMail Routes*
-(POST /api/v1/diagnoBuddy/sendMail):
+(POST https://diagno-buddy.vercel.app/api/v1/diagnoBuddy/sendMail):
 Endpoint for sending user chat histories to their email addresses.
 
 
