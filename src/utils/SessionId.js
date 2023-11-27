@@ -1,13 +1,16 @@
 const SessionHelper = require("../helpers/SessionHelper");
 const ChatStorageService = require("../services/ChatStorageService");
 
+const SESSION_EXPIRATION_TIME = 5 * 60 * 1000;
+
+let sessionTimer;
+
+
+
 const generateId = () => {
   return Math.floor(Math.random() * 1000000).toString();
 };
 
-const SESSION_EXPIRATION_TIME = 5 * 60  * 1000; 
-
-let sessionTimer;
 
 const resetSessionTimer = (email) => {
   clearTimeout(sessionTimer);
@@ -16,6 +19,7 @@ const resetSessionTimer = (email) => {
     ChatStorageService.resetChatHistory(email);
   }, SESSION_EXPIRATION_TIME);
 };
+
 
 const cookieToken = async (email, res) => {
   const existingUserSessionId = await SessionHelper.getExistingUserSessionId(
@@ -44,5 +48,4 @@ const cookieToken = async (email, res) => {
 
 module.exports = {
   cookieToken,
-  generateId
 };

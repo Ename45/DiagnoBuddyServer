@@ -28,10 +28,11 @@ const processResponse = async ({ email, message, sessionId }, res) => {
     const data = await response.json();
 
     const aiResponse = data.AI_out;
-    // console.log("newData==============>", aiResponse);
+
     await ChatStorageService.addChat(email, message, aiResponse, sessionId);
 
     await ChatStorageService.getHistoryOfChat(email);
+    
     return {
       data,
       sessionId,
